@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DownX 微文存阅 · v3.1.39 多端正式发布</title>
+<meta name="description" content="DownX（微文存阅）把 X 官方长文与微信公众号文章完整归档到本地：桌面端负责采集，Web 端管理，H5 与 Android 移动阅读，浏览器扩展站内一键归档。数据默认不出本机。">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Cpath d='M8 10 16 6l8 4v12l-8 4-8-4z' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Cpath d='M8 10 16 14l8-4M16 14v12' fill='none' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+/* ===================== 设计变量 ===================== */
+:root{
+  color-scheme: light;
+  --bg:#ffffff;
+  --band:#f6f8fb;
+  --band-strong:#eef3f9;
+  --surface:#ffffff;
+  --text:#111827;
+  --muted:#5f6b7a;
+  --subtle:#8491a3;
+  --border:#d9e1ec;
+  --border-soft:#e7edf5;
+  --blue:#2563eb;
+  --blue-dark:#1d4ed8;
+  --blue-soft:#eaf2ff;
+  --green:#0f8f55;
+  --orange:#e87722;
+  --shadow-sm:0 6px 18px rgba(24,39,75,.08);
+  --shadow-lg:0 24px 60px rgba(24,39,75,.14);
+  --radius:10px;
+  --content:1180px;
+  --header-h:72px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Microsoft YaHei","PingFang SC","Hiragino Sans GB",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:var(--header-h)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.65;min-width:320px;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+svg{display:block;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.9}
+.icon-sprite{display:none}
+code{font-family:var(--mono);font-size:.86em;background:var(--band-strong);border-radius:5px;padding:1px 6px}
+
+/* ===================== 头部导航 ===================== */
+.site-header{
+  position:sticky;top:0;z-index:30;height:var(--header-h);display:flex;align-items:center;gap:26px;
+  padding:0 max(22px,calc((100% - var(--content))/2));
+  background:rgba(255,255,255,.9);backdrop-filter:saturate(160%) blur(10px);
+  border-bottom:1px solid var(--border-soft);transition:box-shadow .2s ease,border-color .2s ease;
+}
+.site-header.is-scrolled{border-color:var(--border);box-shadow:0 8px 24px rgba(24,39,75,.07)}
+.brand{display:inline-flex;align-items:center;gap:10px;flex:0 0 auto}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;display:grid;place-items:center;box-shadow:0 6px 14px rgba(37,99,235,.28)}
+.brand-mark svg{width:19px;height:19px;stroke-width:2.1}
+.brand-text{display:flex;flex-direction:column;line-height:1.15}
+.brand-text b{font-size:17px;letter-spacing:.2px}
+.brand-text span{font-size:11.5px;color:var(--subtle);letter-spacing:.6px}
+.site-nav{display:flex;gap:4px;margin-left:auto}
+.site-nav a{padding:8px 12px;border-radius:8px;color:var(--muted);font-size:14.5px;white-space:nowrap;transition:color .16s,background .16s}
+.site-nav a:hover{color:var(--text);background:var(--band)}
+.header-actions{display:flex;align-items:center;gap:10px;margin-left:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:9px;font-size:14.5px;font-weight:600;padding:10px 18px;transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s;cursor:pointer;border:1px solid transparent}
+.btn svg{width:16px;height:16px}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 8px 18px rgba(37,99,235,.26)}
+.btn-primary:hover{background:var(--blue-dark);transform:translateY(-1px);box-shadow:0 12px 24px rgba(37,99,235,.3)}
+.btn-secondary{background:#fff;color:var(--text);border-color:var(--border)}
+.btn-secondary:hover{border-color:#bfcede;background:var(--band);transform:translateY(-1px)}
+.btn-ghost{background:var(--band);color:var(--muted);border-color:transparent;font-weight:500}
+.menu-button{display:none;margin-left:auto;width:40px;height:40px;border-radius:9px;background:var(--band);color:var(--muted);align-items:center;justify-content:center}
+.menu-button svg{width:20px;height:20px}
+.mobile-nav{display:none}
+
+/* ===================== 通用版式 ===================== */
+.section-band{background:var(--band)}
+main{display:block}
+.section{padding:88px 0}
+.wrap{width:100%;max-width:var(--content);margin:0 auto;padding:0 28px}
+.section-heading{max-width:760px;margin:0 auto 44px;text-align:center}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;letter-spacing:.6px;color:var(--blue);font-weight:700;background:var(--blue-soft);padding:5px 12px;border-radius:999px;margin-bottom:16px}
+.section-heading h2{font-size:clamp(26px,3.1vw,36px);line-height:1.24;margin:0 0 14px;letter-spacing:-.3px}
+.section-heading p{color:var(--muted);margin:0;font-size:16.5px}
+
+/* ===================== 首屏 ===================== */
+.hero{position:relative;padding:76px 0 84px;background:
+  radial-gradient(1200px 520px at 82% -10%,rgba(37,99,235,.10),transparent 62%),
+  linear-gradient(180deg,#fff 0%,var(--band) 100%);
+  border-bottom:1px solid var(--border-soft);overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:56px;align-items:center}
+.hero-copy h1{font-size:clamp(34px,4.6vw,52px);line-height:1.16;letter-spacing:-1px;margin:0 0 20px}
+.hero-copy h1 em{font-style:normal;color:var(--blue)}
+.hero-lead{color:var(--muted);font-size:17px;margin:0 0 28px;max-width:560px}
+.hero-lead b{color:var(--text);font-weight:600}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+.trust{display:flex;flex-wrap:wrap;gap:8px 18px;list-style:none;margin:0;padding:0;color:var(--muted);font-size:13.5px}
+.trust li{display:inline-flex;align-items:center;gap:6px}
+.trust svg{width:15px;height:15px;color:var(--green);flex:0 0 auto}
+
+/* 应用窗口预览（纯 CSS/SVG，无图片依赖） */
+.mock{border-radius:14px;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow-lg);overflow:hidden}
+.mock-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border-soft);background:linear-gradient(180deg,#fbfdff,#f4f8fd)}
+.mock-dots{display:flex;gap:6px}
+.mock-dots i{width:9px;height:9px;border-radius:50%;background:#d7e0ec;display:block}
+.mock-title{margin:0 auto;font-size:12px;color:var(--subtle);letter-spacing:.4px}
+.mock-body{display:grid;grid-template-columns:132px minmax(0,1fr);min-height:300px}
+.mock-side{border-right:1px solid var(--border-soft);background:#fafcff;padding:14px 10px;display:flex;flex-direction:column;gap:5px}
+.mock-side .group{font-size:10.5px;color:var(--subtle);letter-spacing:.8px;margin:8px 4px 2px}
+.mock-side .item{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:7px;font-size:12px;color:var(--muted)}
+.mock-side .item svg{width:13px;height:13px;color:#8fa3bd}
+.mock-side .item.active{background:var(--blue-soft);color:var(--blue-dark);font-weight:600}
+.mock-side .item.active svg{color:var(--blue)}
+.mock-main{display:grid;grid-template-rows:auto minmax(0,1fr)}
+.mock-toolbar{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--border-soft)}
+.mock-search{flex:1;display:flex;align-items:center;gap:6px;height:29px;padding:0 10px;border-radius:7px;background:var(--band);color:var(--subtle);font-size:11.5px;border:1px solid var(--border-soft)}
+.mock-search svg{width:13px;height:13px}
+.mock-chip{font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:4px 8px}
+.mock-list{padding:6px 0;overflow:hidden}
+.mock-row{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-bottom:1px solid #f1f5fa}
+.mock-row:last-child{border-bottom:0}
+.mock-thumb{width:46px;height:38px;border-radius:6px;background:linear-gradient(135deg,#dbeafd,#c7dbf8);flex:0 0 auto}
+.mock-row:nth-child(2n) .mock-thumb{background:linear-gradient(135deg,#e9f3ea,#d3e9d6)}
+.mock-row:nth-child(3n) .mock-thumb{background:linear-gradient(135deg,#fdece0,#f8dcc6)}
+.mock-line{flex:1;min-width:0}
+.mock-line b{display:block;font-size:12.5px;font-weight:600;color:#26313f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mock-line span{display:block;font-size:10.5px;color:var(--subtle);margin-top:3px}
+.mock-tag{font-size:10px;color:var(--green);background:#e9f7ef;border-radius:5px;padding:2px 6px;height:fit-content;white-space:nowrap}
+.mock-tag.blue{color:var(--blue);background:var(--blue-soft)}
+.mock-foot{display:flex;align-items:center;gap:8px;padding:9px 14px;border-top:1px solid var(--border-soft);font-size:11px;color:var(--subtle);background:#fcfdff}
+
+/* ===================== 功能特性 ===================== */
+.feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.card{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius);padding:26px 24px;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.card:hover{transform:translateY(-3px);border-color:var(--border);box-shadow:var(--shadow-sm)}
+.feature-icon{width:42px;height:42px;border-radius:10px;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;margin-bottom:16px}
+.feature-icon svg{width:21px;height:21px}
+.card h3{font-size:18px;margin:0 0 10px;letter-spacing:-.2px}
+.card p{color:var(--muted);font-size:14.8px;margin:0 0 14px}
+.card ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.card ul li{display:flex;gap:8px;font-size:13.6px;color:var(--muted);line-height:1.5}
+.card ul li svg{width:14px;height:14px;color:var(--blue);flex:0 0 auto;margin-top:3px}
+
+/* ===================== 平台矩阵 ===================== */
+.platform-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.platform-card{background:#fff;border:1px solid var(--border-soft);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:10px;transition:border-color .18s,box-shadow .18s,transform .18s}
+.platform-card:hover{transform:translateY(-2px);border-color:var(--border);box-shadow:var(--shadow-sm)}
+.platform-head{display:flex;align-items:center;gap:10px}
+.platform-head .icon{width:34px;height:34px;border-radius:8px;background:var(--band);color:#3d5673;display:grid;place-items:center;flex:0 0 auto}
+.platform-head .icon svg{width:18px;height:18px}
+.platform-head h3{font-size:15px;margin:0;letter-spacing:-.1px}
+.platform-head span{display:block;font-size:11.5px;color:var(--subtle);margin-top:1px}
+.platform-file{font-family:var(--mono);font-size:11.5px;color:var(--muted);word-break:break-all;background:var(--band);border-radius:6px;padding:7px 9px}
+.platform-meta{display:flex;align-items:center;justify-content:space-between;margin-top:auto;font-size:12px;color:var(--subtle)}
+.platform-meta b{color:var(--text);font-weight:600;font-size:13px}
+.link-dl{display:inline-flex;align-items:center;gap:5px;color:var(--blue);font-size:13px;font-weight:600}
+.link-dl svg{width:14px;height:14px}
+.link-dl:hover{color:var(--blue-dark)}
+.platform-meta .dual{display:inline-flex;gap:10px}
+.platform-meta .dual .link-dl{gap:3px}
+
+/* ===================== 安装指引 ===================== */
+.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.step{background:#fff;border:1px solid var(--border-soft);border-radius:var(--radius);padding:24px;min-width:0}
+.step-num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--blue);color:#fff;font-size:13px;font-weight:700;margin-bottom:12px}
+.step h3{font-size:16px;margin:0 0 8px}
+.step p{color:var(--muted);font-size:14.2px;margin:0 0 10px}
+.step pre{margin:0;background:#0f172a;color:#e2e8f0;border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:12.2px;overflow-x:auto;line-height:1.6;max-width:100%}
+.callout{display:flex;gap:12px;align-items:flex-start;background:var(--blue-soft);border:1px solid #cfe0fb;border-radius:var(--radius);padding:16px 18px;margin-top:20px;font-size:14px;color:#24476f}
+.callout svg{width:18px;height:18px;color:var(--blue);flex:0 0 auto;margin-top:2px}
+
+/* ===================== 下载区 ===================== */
+.download-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.dl-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:26px 24px;display:flex;flex-direction:column}
+.dl-card h3{font-size:18px;margin:0 0 6px}
+.dl-card > p{color:var(--muted);font-size:14px;margin:0 0 18px}
+.dl-list{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:10px}
+.dl-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border-soft);border-radius:8px;background:#fcfdff}
+.dl-list .file{min-width:0}
+.dl-list .file b{display:block;font-family:var(--mono);font-size:12px;font-weight:600;word-break:break-all}
+.dl-list .file span{font-size:11.5px;color:var(--subtle)}
+.dl-list a{flex:0 0 auto;color:var(--blue);display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600}
+.dl-list a svg{width:14px;height:14px}
+.dl-card .btn{margin-top:auto;width:100%}
+
+/* ===================== 版本信息 ===================== */
+.version-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:32px;align-items:start}
+.table-wrap{border:1px solid var(--border-soft);border-radius:var(--radius);overflow:hidden;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--border-soft)}
+th{background:var(--band);font-size:12.5px;letter-spacing:.4px;color:var(--muted);font-weight:600;text-transform:uppercase}
+td:last-child,th:last-child{text-align:right}
+tbody tr:last-child td{border-bottom:0}
+td.mono{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+th:nth-child(2),td:nth-child(2){width:160px;white-space:nowrap;text-align:left}
+.release-note{background:#fff;border:1px solid var(--border-soft);border-radius:var(--radius);padding:24px}
+.release-note h3{font-size:16px;margin:0 0 12px}
+.release-note dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:13.4px}
+.release-note dt{color:var(--subtle)}
+.release-note dd{margin:0;font-family:var(--mono);font-size:12.4px;word-break:break-all}
+.changelog{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-direction:column;gap:9px}
+.changelog li{display:flex;gap:9px;font-size:13.4px;color:var(--muted)}
+.changelog li svg{width:14px;height:14px;color:var(--green);flex:0 0 auto;margin-top:3px}
+
+/* ===================== 页脚 ===================== */
+.site-footer{border-top:1px solid var(--border-soft);background:var(--band);padding:36px 0}
+.footer-inner{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;color:var(--subtle);font-size:13px}
+.footer-inner .left{display:flex;align-items:center;gap:10px}
+.footer-inner .left b{color:var(--muted);font-weight:600}
+.footer-links{display:flex;gap:18px}
+.footer-links a:hover{color:var(--text)}
+
+/* ===================== 响应式 ===================== */
+@media (max-width:1080px){
+  .hero-grid{grid-template-columns:1fr;gap:40px}
+  .mock{max-width:560px;margin:0 auto}
+  .feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .platform-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .download-grid{grid-template-columns:1fr}
+  .version-grid{grid-template-columns:1fr}
+}
+@media (max-width:860px){
+  .site-nav{display:none}
+  .header-actions .btn-secondary{display:none}
+  .menu-button{display:inline-flex}
+  .mobile-nav{display:none;position:fixed;top:var(--header-h);left:0;right:0;bottom:0;background:#fff;padding:18px 24px;z-index:25;flex-direction:column;gap:4px}
+  .mobile-nav.open{display:flex}
+  .mobile-nav a{padding:13px 10px;border-radius:8px;color:var(--muted);font-size:15px;border-bottom:1px solid var(--border-soft)}
+  .mobile-nav a:last-child{border-bottom:0}
+  .section{padding:64px 0}
+  .steps{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:600px){
+  .wrap{padding:0 18px}
+  .header-actions{display:none}
+  .site-header{gap:12px;padding:0 18px}
+  .brand-text b{font-size:16px}
+  .feature-grid,.platform-grid{grid-template-columns:1fr}
+  .mock-body{grid-template-columns:1fr}
+  .mock-side{display:none}
+  .hero-actions .btn{width:100%}
+  .hero-copy h1{font-size:32px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{scroll-behavior:auto;transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== 图标精灵 ===================== -->
+<svg class="icon-sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-logo" viewBox="0 0 24 24"><path d="M4 6.5 12 3l8 3.5v11L12 21l-8-3.5z"/><path d="M4 6.5 12 10l8-3.5M12 10v11"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M4 19.5h16"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v6c0 4 3 6.6 7 8.5 4-1.9 7-4.5 7-8.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 8.5 4.5L12 12 3.5 7.5z"/><path d="m4 12.5 8 4.2 8-4.2"/><path d="m4 16.8 8 4.2 8-4.2"/></symbol>
+  <symbol id="i-queue" viewBox="0 0 24 24"><rect x="3.5" y="5" width="12" height="14" rx="2"/><path d="M18 7.5h2.5v11a2 2 0 0 1-2 2H8.5"/><path d="M6.5 9h6M6.5 12.5h6M6.5 16h4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></symbol>
+  <symbol id="i-sync" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.6-5.7"/><path d="M17.5 3v3.5H14"/><path d="M20 12a8 8 0 0 1-13.6 5.7"/><path d="M6.5 21v-3.5H10"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 11v6"/><path d="m9.5 14.5 2.5 2.5 2.5-2.5"/></symbol>
+  <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2.5 19h19"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 19h3"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="6" rx="2"/><rect x="3.5" y="14" width="17" height="6" rx="2"/><path d="M7 7h.01M7 17h.01"/></symbol>
+  <symbol id="i-puzzle" viewBox="0 0 24 24"><path d="M10 4a2 2 0 1 1 4 0v2h3.5v3.5h2a2 2 0 1 1 0 4h-2V17H14v-2a2 2 0 1 0-4 0v2H6.5V13h-2a2 2 0 1 1 0-4h2V6H10z"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v.01M11 12h1v4h1"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h13"/><path d="m13 7 5 5-5 5"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.4 6.4"/><path d="M20 4v7h-7"/></symbol>
+</svg>
+
+<!-- ===================== 头部 ===================== -->
+<header class="site-header">
+  <a class="brand" href="#top" aria-label="DownX 首页">
+    <span class="brand-mark"><svg aria-hidden="true"><use href="#i-logo"></use></svg></span>
+    <span class="brand-text"><b>DownX</b><span>微文存阅</span></span>
+  </a>
+  <nav class="site-nav" aria-label="页面导航">
+    <a href="#features">功能特性</a>
+    <a href="#platforms">平台矩阵</a>
+    <a href="#manual">安装使用</a>
+    <a href="#download">下载</a>
+    <a href="#about">版本信息</a>
+  </nav>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="#platforms">支持的平台</a>
+    <a class="btn btn-primary" href="#download"><svg aria-hidden="true"><use href="#i-download"></use></svg><span>下载 v3.1.39</span></a>
+  </div>
+  <button class="menu-button" type="button" aria-label="打开导航" aria-expanded="false" id="menuBtn"><svg aria-hidden="true"><use href="#i-menu"></use></svg></button>
+</header>
+<nav class="mobile-nav" id="mobileNav" aria-label="移动端导航">
+  <a href="#features">功能特性</a>
+  <a href="#platforms">平台矩阵</a>
+  <a href="#manual">安装使用</a>
+  <a href="#download">下载</a>
+  <a href="#about">版本信息</a>
+</nav>
+
+<main id="top">
+
+  <!-- ===================== 首屏 ===================== -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">2026-11-19 · v3.1.39 多端正式发布</span>
+        <h1>把长文，留在<br><em>你自己的机器里。</em></h1>
+        <p class="hero-lead">
+          DownX 把 <b>X 官方长文</b>与<b>微信公众号文章</b>完整归档到本地：
+          桌面端负责采集，Web 端管理看板，H5 与 Android 移动阅读，扩展站内一键归档。
+          复用本机浏览器登录态，不存账号密码；<b>数据默认不出本机</b>。
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#download"><svg aria-hidden="true"><use href="#i-download"></use></svg><span>下载安装包</span></a>
+          <a class="btn btn-secondary" href="#features"><svg aria-hidden="true"><use href="#i-check"></use></svg><span>六项核心能力</span></a>
+        </div>
+        <ul class="trust" aria-label="产品特点">
+          <li><svg aria-hidden="true"><use href="#i-check"></use></svg>六端同一份数据</li>
+          <li><svg aria-hidden="true"><use href="#i-check"></use></svg>无密码登录采集</li>
+          <li><svg aria-hidden="true"><use href="#i-check"></use></svg>离线可读</li>
+          <li><svg aria-hidden="true"><use href="#i-check"></use></svg>后端可选</li>
+        </ul>
+      </div>
+
+      <div class="hero-visual" aria-label="DownX 桌面端界面示意">
+        <div class="mock">
+          <div class="mock-bar">
+            <span class="mock-dots"><i></i><i></i><i></i></span>
+            <span class="mock-title">DownX · 资料库</span>
+          </div>
+          <div class="mock-body">
+            <aside class="mock-side">
+              <div class="item active"><svg aria-hidden="true"><use href="#i-layers"></use></svg>资料库</div>
+              <div class="item"><svg aria-hidden="true"><use href="#i-queue"></use></svg>任务管理</div>
+              <div class="item"><svg aria-hidden="true"><use href="#i-search"></use></svg>全文搜索</div>
+              <div class="group">采集</div>
+              <div class="item"><svg aria-hidden="true"><use href="#i-shield"></use></svg>浏览器登录</div>
+              <div class="item"><svg aria-hidden="true"><use href="#i-sync"></use></svg>同步</div>
+              <div class="group">设置</div>
+              <div class="item"><svg aria-hidden="true"><use href="#i-export"></use></svg>导出</div>
+            </aside>
+            <div class="mock-main">
+              <div class="mock-toolbar">
+                <span class="mock-search"><svg aria-hidden="true"><use href="#i-search"></use></svg>搜索标题 / 正文 / 博主</span>
+                <span class="mock-chip">全部</span>
+                <span class="mock-chip">已归档</span>
+              </div>
+              <div class="mock-list">
+                <div class="mock-row">
+                  <span class="mock-thumb"></span>
+                  <div class="mock-line"><b>一个人如何把长文读成体系</b><span>@长文观察 · 2026-11-18 · X Article</span></div>
+                  <span class="mock-tag">已归档</span>
+                </div>
+                <div class="mock-row">
+                  <span class="mock-thumb"></span>
+                  <div class="mock-line"><b>把复杂问题拆成可执行清单</b><span>@公众号 · 2026-11-17 · 公众号</span></div>
+                  <span class="mock-tag blue">图文</span>
+                </div>
+                <div class="mock-row">
+                  <span class="mock-thumb"></span>
+                  <div class="mock-line"><b>关于深度工作的 12 条笔记</b><span>@长文观察 · 2026-11-16 · X Article</span></div>
+                  <span class="mock-tag">离线可读</span>
+                </div>
+                <div class="mock-row">
+                  <span class="mock-thumb"></span>
+                  <div class="mock-line"><b>下载、导出与资料库的边界</b><span>@公众号 · 2026-11-15 · 公众号</span></div>
+                  <span class="mock-tag blue">图文</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mock-foot">
+            <span>本地存储 · 我的待办/downX/x-article</span>
+            <span style="margin-left:auto">图片 · 视频已保存原文件</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 功能特性 ===================== -->
+  <section class="section" id="features">
+    <div class="wrap">
+      <div class="section-heading">
+        <span class="eyebrow">功能特性</span>
+        <h2>六项能力，覆盖「采集 → 归档 → 阅读 → 导出」</h2>
+        <p>不是又一个稍后读工具：它把正文、图片、视频原文件一起落到你自己的硬盘上。</p>
+      </div>
+      <div class="feature-grid">
+        <article class="card">
+          <span class="feature-icon"><svg aria-hidden="true"><use href="#i-shield"></use></svg></span>
+          <h3>复用登录态，不存密码</h3>
+          <p>复用本机 Chrome / Edge 已保存的会话与 X 登录，不写设置、不写日志、不上传。</p>
+          <ul>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>优先连接本机 CDP 会话</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>不修改、不重启你的日常浏览器</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>只有无法复用时才需要手动登录一次</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="feature-icon"><svg aria-hidden="true"><use href="#i-layers"></use></svg></span>
+          <h3>双源归档：X + 公众号</h3>
+          <p>X 官方 Article 与含长文正文的帖子，加上微信公众号文章，正文清洗后统一入库。</p>
+          <ul>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>支持单篇链接、分享链接、博主主页批量</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>一次最多 100 条，博主默认最近 10 篇</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>图片存原图，视频优先 MP4 / HLS 合并</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="feature-icon"><svg aria-hidden="true"><use href="#i-queue"></use></svg></span>
+          <h3>队列可控，断点可续</h3>
+          <p>下载与导出都在任务队列里跑，出错不丢已完成的部分。</p>
+          <ul>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>暂停在安全步骤完成后生效</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>取消保留已完成结果，重试只跑未完成项</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>退出后未完成任务显示「等待继续」</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="feature-icon"><svg aria-hidden="true"><use href="#i-search"></use></svg></span>
+          <h3>三栏资料库</h3>
+          <p>按博主、日期、完整性筛选，全文搜索，阅读视图可调字号并批量导出。</p>
+          <ul>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>界面字号 14–18px，正文 16–24px</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>回收站与批量操作</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>离线状态也能翻已归档的图文</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="feature-icon"><svg aria-hidden="true"><use href="#i-sync"></use></svg></span>
+          <h3>六端同阅，后端可选</h3>
+          <p>服务端是唯一权威数据源；桌面端内嵌本机服务面，供扩展与手机直连。</p>
+          <ul>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>桌面采集 → Web 看板 → H5 / Android 阅读</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>内嵌服务面 <code>127.0.0.1:17321</code></li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>后端未启动时客户端照常可用</li>
+          </ul>
+        </article>
+        <article class="card">
+          <span class="feature-icon"><svg aria-hidden="true"><use href="#i-export"></use></svg></span>
+          <h3>成套导出与命令行</h3>
+          <p>一篇长文导出 Markdown / DOCX / PDF，保留结构与图片，方便二次整理。</p>
+          <ul>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>三种格式一次选中，批量执行</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>图片、视频随导出一起带走</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>命令行单次归档，任务结果与完整性一并输出</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 平台矩阵 ===================== -->
+  <section class="section section-band" id="platforms">
+    <div class="wrap">
+      <div class="section-heading">
+        <span class="eyebrow">平台矩阵</span>
+        <h2>一个版本，六个端</h2>
+        <p>同一套跨端契约，桌面端采集、Web 管理、移动阅读、扩展入站，产物全部来自同一次构建。</p>
+      </div>
+      <div class="platform-grid">
+        <article class="platform-card">
+          <div class="platform-head">
+            <span class="icon"><svg aria-hidden="true"><use href="#i-laptop"></use></svg></span>
+            <div><h3>macOS · Intel</h3><span>x86_64 · DMG</span></div>
+          </div>
+          <div class="platform-file">DownX_3.1.39_x64.dmg</div>
+          <div class="platform-meta"><b>13.2 MB</b><a class="link-dl" href="downloads/DownX_3.1.39_x64.dmg" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a></div>
+        </article>
+        <article class="platform-card">
+          <div class="platform-head">
+            <span class="icon"><svg aria-hidden="true"><use href="#i-laptop"></use></svg></span>
+            <div><h3>macOS · Apple Silicon</h3><span>aarch64 · DMG</span></div>
+          </div>
+          <div class="platform-file">DownX_3.1.39_aarch64.dmg</div>
+          <div class="platform-meta"><b>12.5 MB</b><a class="link-dl" href="downloads/DownX_3.1.39_aarch64.dmg" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a></div>
+        </article>
+        <article class="platform-card">
+          <div class="platform-head">
+            <span class="icon"><svg aria-hidden="true"><use href="#i-monitor"></use></svg></span>
+            <div><h3>Windows · x64</h3><span>NSIS 安装包</span></div>
+          </div>
+          <div class="platform-file">DownX_3.1.39_x64-setup.exe</div>
+          <div class="platform-meta"><b>8.8 MB</b><a class="link-dl" href="downloads/DownX_3.1.39_x64-setup.exe" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a></div>
+        </article>
+        <article class="platform-card">
+          <div class="platform-head">
+            <span class="icon"><svg aria-hidden="true"><use href="#i-server"></use></svg></span>
+            <div><h3>Linux · amd64</h3><span>DEB / AppImage</span></div>
+          </div>
+          <div class="platform-file">DownX_3.1.39_amd64.deb<br>DownX_3.1.39_amd64.AppImage</div>
+          <div class="platform-meta"><b>16.2 / 89.8 MB</b><span class="dual"><a class="link-dl" href="downloads/DownX_3.1.39_amd64.deb" download>DEB</a><a class="link-dl" href="downloads/DownX_3.1.39_amd64.AppImage" download>AppImage</a></span></div>
+        </article>
+        <article class="platform-card">
+          <div class="platform-head">
+            <span class="icon"><svg aria-hidden="true"><use href="#i-phone"></use></svg></span>
+            <div><h3>Android</h3><span>minSdk 26 · 3.1.39 (300)</span></div>
+          </div>
+          <div class="platform-file">DownX_3.1.39_android.apk</div>
+          <div class="platform-meta"><b>24.9 MB</b><a class="link-dl" href="downloads/DownX_3.1.39_android.apk" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a></div>
+        </article>
+        <article class="platform-card">
+          <div class="platform-head">
+            <span class="icon"><svg aria-hidden="true"><use href="#i-server"></use></svg></span>
+            <div><h3>Web 服务端</h3><span>Spring Boot 2.7.18 · Java 17</span></div>
+          </div>
+          <div class="platform-file">xdoc-api-3.1.5.jar</div>
+          <div class="platform-meta"><b>29.5 MB</b><a class="link-dl" href="downloads/xdoc-api-3.1.5.jar" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a></div>
+        </article>
+        <article class="platform-card">
+          <div class="platform-head">
+            <span class="icon"><svg aria-hidden="true"><use href="#i-monitor"></use></svg></span>
+            <div><h3>Web 前端 / H5</h3><span>Vue 3 + Vite 静态包</span></div>
+          </div>
+          <div class="platform-file">xdox-web-dist.zip<br>xdoc-h5-dist.zip</div>
+          <div class="platform-meta"><b>0.9 / 28.3 MB</b><span class="dual"><a class="link-dl" href="downloads/xdox-web-dist.zip" download>Web</a><a class="link-dl" href="downloads/xdoc-h5-dist.zip" download>H5</a></span></div>
+        </article>
+        <article class="platform-card">
+          <div class="platform-head">
+            <span class="icon"><svg aria-hidden="true"><use href="#i-puzzle"></use></svg></span>
+            <div><h3>浏览器扩展</h3><span>Manifest V3 · 1.9.0</span></div>
+          </div>
+          <div class="platform-file">downx-extension-1.9.0.zip</div>
+          <div class="platform-meta"><b>111 KB</b><a class="link-dl" href="downloads/downx-extension-1.9.0.zip" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 安装使用 ===================== -->
+  <section class="section" id="manual">
+    <div class="wrap">
+      <div class="section-heading">
+        <span class="eyebrow">安装使用</span>
+        <h2>四步跑通第一次归档</h2>
+        <p>桌面端是唯一持有登录态的执行端，其余端在需要多设备时再接服务端。</p>
+      </div>
+      <div class="steps">
+        <article class="step">
+          <span class="step-num">1</span>
+          <h3>装桌面端</h3>
+          <p>按你的系统下载 DMG / EXE / DEB，安装后打开 DownX。macOS 构建为 ad-hoc 签名，首次启动需放行。</p>
+          <pre># 若提示「已损坏」或无法验证开发者
+xattr -dr com.apple.quarantine /Applications/DownX.app</pre>
+        </article>
+        <article class="step">
+          <span class="step-num">2</span>
+          <h3>复用浏览器登录</h3>
+          <p>设置里选择 Chrome 或 Edge，点「复用浏览器登录」；系统询问钥匙串访问时允许读取浏览器会话。不修改、不重启你的日常浏览器。</p>
+          <pre>系统设置 → 采集 → 复用浏览器登录
+# 无法复用时再点「打开采集窗口」手动登录一次</pre>
+        </article>
+        <article class="step">
+          <span class="step-num">3</span>
+          <h3>粘贴链接开始下载</h3>
+          <p>官方 Article 链接、文章分享链接、博主主页或公众号链接都可以，多行最多 100 条；任务进度在「任务管理」里看。</p>
+          <pre>默认保存目录：我的待办/downX/x-article
+# 支持多行批量，单次最多 100 条；博主主页默认最近 10 篇</pre>
+        </article>
+        <article class="step">
+          <span class="step-num">4</span>
+          <h3>阅读、导出、上多端</h3>
+          <p>在三栏资料库里筛选、批量导出 Markdown / DOCX / PDF；需要多设备时启动 <code>xdoc-api</code> 与 Web 前端，扩展与手机即可接入。</p>
+          <pre># 命令行单次归档（先退出桌面应用）
+/Applications/DownX.app/Contents/MacOS/downx \
+  --archive https://x.com/user/status/123 \
+  --save-dir "/绝对路径/X"</pre>
+        </article>
+      </div>
+      <div class="callout">
+        <svg aria-hidden="true"><use href="#i-info"></use></svg>
+        <span><b>按需选择：</b>只想在单机归档阅读，装桌面端就够了；要手机同步或团队看板，再叠 Web 服务端与前端。</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 下载 ===================== -->
+  <section class="section section-band" id="download">
+    <div class="wrap">
+      <div class="section-heading">
+        <span class="eyebrow">下载</span>
+        <h2>选择你的平台</h2>
+        <p>全部文件为本仓库同源直链，不走 Release 转发，国内访问更稳。</p>
+      </div>
+      <div class="download-grid">
+        <article class="dl-card">
+          <h3>桌面端</h3>
+          <p>采集与执行的主入口，安装后即可独立使用。</p>
+          <ul class="dl-list">
+            <li>
+              <span class="file"><b>DownX_3.1.39_x64.dmg</b><span>macOS Intel · 13.2 MB</span></span>
+              <a href="downloads/DownX_3.1.39_x64.dmg" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a>
+            </li>
+            <li>
+              <span class="file"><b>DownX_3.1.39_aarch64.dmg</b><span>macOS Apple Silicon · 12.5 MB</span></span>
+              <a href="downloads/DownX_3.1.39_aarch64.dmg" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a>
+            </li>
+            <li>
+              <span class="file"><b>DownX_3.1.39_x64-setup.exe</b><span>Windows x64 · 8.8 MB</span></span>
+              <a href="downloads/DownX_3.1.39_x64-setup.exe" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a>
+            </li>
+            <li>
+              <span class="file"><b>DownX_3.1.39_amd64.deb</b><span>Linux amd64 · 16.2 MB</span></span>
+              <a href="downloads/DownX_3.1.39_amd64.deb" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a>
+            </li>
+            <li>
+              <span class="file"><b>DownX_3.1.39_amd64.AppImage</b><span>Linux 便携 · 89.8 MB</span></span>
+              <a href="downloads/DownX_3.1.39_amd64.AppImage" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a>
+            </li>
+          </ul>
+          <a class="btn btn-primary" href="downloads/DownX_3.1.39_aarch64.dmg" download><svg aria-hidden="true"><use href="#i-download"></use></svg><span>下载推荐版本</span></a>
+        </article>
+
+        <article class="dl-card">
+          <h3>移动端与扩展</h3>
+          <p>只读消费与站内一键归档，配合桌面端或服务端使用。</p>
+          <ul class="dl-list">
+            <li>
+              <span class="file"><b>DownX_3.1.39_android.apk</b><span>Android · 24.9 MB</span></span>
+              <a href="downloads/DownX_3.1.39_android.apk" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a>
+            </li>
+            <li>
+              <span class="file"><b>xdoc-h5-dist.zip</b><span>H5 静态包 · 28.3 MB</span></span>
+              <a href="downloads/xdoc-h5-dist.zip" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a>
+            </li>
+            <li>
+              <span class="file"><b>downx-extension-1.9.0.zip</b><span>Chrome / Edge MV3 · 111 KB</span></span>
+              <a href="downloads/downx-extension-1.9.0.zip" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a>
+            </li>
+            <li>
+              <span class="file"><b>xdoc-api-3.1.5.jar</b><span>Web 服务端 · 29.5 MB</span></span>
+              <a href="downloads/xdoc-api-3.1.5.jar" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a>
+            </li>
+            <li>
+              <span class="file"><b>xdox-web-dist.zip</b><span>Web 前端静态包 · 0.9 MB</span></span>
+              <a href="downloads/xdox-web-dist.zip" download><svg aria-hidden="true"><use href="#i-download"></use></svg>下载</a>
+            </li>
+          </ul>
+          <a class="btn btn-secondary" href="#manual"><svg aria-hidden="true"><use href="#i-arrow"></use></svg><span>查看安装步骤</span></a>
+        </article>
+
+        <article class="dl-card">
+          <h3>部署到服务端</h3>
+          <p>需要多设备同步或团队看板时，叠一层 Web 服务端。</p>
+          <ul class="dl-list">
+            <li>
+              <span class="file"><b>1. 启动 API</b><span>Java 17 · <code>java -jar xdoc-api-3.1.5.jar</code></span></span>
+            </li>
+            <li>
+              <span class="file"><b>2. 解压前端</b><span>放至任意静态目录，指向 API 地址</span></span>
+            </li>
+            <li>
+              <span class="file"><b>3. 解压 H5</b><span>手机端访问同一 API</span></span>
+            </li>
+            <li>
+              <span class="file"><b>4. 装扩展</b><span>解压后「加载已解压的扩展程序」</span></span>
+            </li>
+            <li>
+              <span class="file"><b>说明</b><span>后端可选：未启动时桌面端照常可用</span></span>
+            </li>
+          </ul>
+          <a class="btn btn-secondary" href="downloads/xdoc-api-3.1.5.jar" download><svg aria-hidden="true"><use href="#i-download"></use></svg><span>下载服务端 jar</span></a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 版本信息 ===================== -->
+  <section class="section" id="about">
+    <div class="wrap">
+      <div class="section-heading">
+        <span class="eyebrow">版本信息</span>
+        <h2>v3.1.39 构建明细</h2>
+        <p>六个端来自同一次构建，产物可直接对号入座。</p>
+      </div>
+      <div class="version-grid">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>端</th><th>版本</th><th>产物</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>桌面客户端（Tauri）</td><td class="mono">3.1.39</td><td class="mono">dmg / exe / deb / AppImage</td></tr>
+              <tr><td>Android App</td><td class="mono">3.1.39 (300)</td><td class="mono">apk</td></tr>
+              <tr><td>Web 服务端</td><td class="mono">3.1.5</td><td class="mono">xdoc-api jar</td></tr>
+              <tr><td>Web 前端</td><td class="mono">3.1.5</td><td class="mono">xdox-web dist</td></tr>
+              <tr><td>H5</td><td class="mono">3.1.5</td><td class="mono">xdoc-h5 dist</td></tr>
+              <tr><td>浏览器扩展</td><td class="mono">1.9.0</td><td class="mono">MV3 zip</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="release-note">
+          <h3>构建与发布</h3>
+          <dl>
+            <dt>标签</dt><dd>v3.1.39</dd>
+            <dt>提交</dt><dd>039b74e1</dd>
+            <dt>构建</dt><dd>GitHub Actions · run #9</dd>
+            <dt>平台</dt><dd>macOS ×2 / Windows / Linux / Android / Web / H5 / 扩展</dd>
+            <dt>发布</dt><dd>2026-11-19</dd>
+          </dl>
+          <ul class="changelog">
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>统一六端构建流程，桌面、移动、Web、扩展一次产出</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>macOS 改为 ad-hoc 签名，本地安装不再需要开发者证书</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>Android 构建补齐 Gradle wrapper 与签名配置</li>
+            <li><svg aria-hidden="true"><use href="#i-check"></use></svg>前端与 H5 改用官方 npm 源，海外构建稳定</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ===================== 页脚 ===================== -->
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="left">
+      <span class="brand-mark" style="width:26px;height:26px;border-radius:7px"><svg aria-hidden="true" style="width:15px;height:15px"><use href="#i-logo"></use></svg></span>
+      <span><b>DownX</b> · 微文存阅 · v3.1.39</span>
+    </div>
+    <div class="footer-links">
+      <a href="#features">功能</a>
+      <a href="#download">下载</a>
+      <a href="#manual">安装</a>
+      <a href="#top">回到顶部</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var header = document.querySelector('.site-header');
+  var onScroll = function(){
+    if (window.scrollY > 8) header.classList.add('is-scrolled');
+    else header.classList.remove('is-scrolled');
+  };
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  var btn = document.getElementById('menuBtn');
+  var nav = document.getElementById('mobileNav');
+  if (btn && nav) {
+    btn.addEventListener('click', function(){
+      var open = nav.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(open));
+    });
+    nav.addEventListener('click', function(e){
+      if (e.target.closest('a')) {
+        nav.classList.remove('open');
+        btn.setAttribute('aria-expanded','false');
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
