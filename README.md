@@ -3,7 +3,12 @@
 零外部依赖的单页静态站，用于分发 DownX v3.1.39 的六端产物。设计约束来自《GitHub Pages 国内访问分析与发布方案》：
 单页纯静态、系统字体、内联 SVG、下载走同源相对路径、不用 Release 直链。
 
+- 线上地址：https://andli0626.github.io/downx-site/
+- 仓库：https://github.com/andli0626/downx-site （public，独立发布库，与源码库 `down-x` 分离）
+- 托管方式：Pages · Deploy from a branch · `main` / `(root)`；每次 push 到 `main` 自动重新部署
+
 ## 目录
+
 
 ```
 site/
@@ -36,17 +41,24 @@ cd site && ./check.sh
 raw.githubusercontent、codeload、objects.githubusercontent、`releases/download`、
 polyfill.io、staticfile、bootcdn。
 
-## 发布到 GitHub Pages
+## 发布方式（已完成）
 
-1. 仓库必须是 **public**（私有库开 Pages 需要 GitHub Pro）。
-2. Settings → Pages → Source 选 `Deploy from a branch`，分支 `main`，目录 `/site`（或把 `site/` 内容推到 `gh-pages` 分支根目录）。
-3. 访问 `https://<owner>.github.io/<repo>/`，锚点入口：`#features`、`#platforms`、`#manual`、`#download`、`#about`。
+独立 public 仓库 `andli0626/downx-site`，`main` 分支根目录即站点根目录：
+
+```bash
+cd site
+git add -A && git commit -m "发布页：<版本>"
+git push origin main        # 远端 ssh://git@ssh.github.com:443/andli0626/downx-site.git
+```
+
+Pages 配置：Settings → Pages → Source `Deploy from a branch` → `main` / `(root)`。
+推送后 1–3 分钟自动重新部署；线上入口 `/#features`、`/#platforms`、`/#manual`、`/#download`、`/#about`。
 
 ## 两个必须知道的限制
 
 - **`downloads/` 共 224 MB**，其中 `DownX_3.1.39_amd64.AppImage` 为 90 MB（GitHub 单文件上限 100 MB，未超）。
-  把产物提交进仓库会把 git 历史永久撑大；更稳的做法是只提交页面，把 `downloads/` 放到
-  Pages 同源的静态目录（对象存储 / 自有服务器），或定期用 `git filter-repo` 清理。
+  本仓库已把产物提交进 `main`（推送时 GitHub 对 90 MB 的 AppImage 给出 >50 MB 的提示，未阻断）。
+  代价是 git 历史永久含这 224 MB；换版本时建议删旧文件再提交，必要时用 `git filter-repo` 清理历史。
 - GitHub Pages 免费额度：站点 ≤ 1 GB、月流量 100 GB 软限。224 MB 的产物被反复下载时，流量比页面本身更先触顶。
 
 ## 更新发布页
